@@ -1,0 +1,9 @@
+
+~	php:S1142,"<This method has 5 returns, which is more than the 3 allowed.(Ý’€Ú8õˆ†º†2J$f3c78d1b-0578-4a2f-a068-02b00c556b2a
+~	php:S1142H"<This method has 4 returns, which is more than the 3 allowed.(Áó¸¤8öˆ†º†2J$0f3e0300-a3cf-4fb4-9b0e-e0584c6c1ac0
+~	php:S1142^"<This method has 4 returns, which is more than the 3 allowed.(§©ïŽ8øˆ†º†2J$dbca03ae-4e44-406c-920d-20e12541d493
+„	php:S1142‹"<This method has 4 returns, which is more than the 3 allowed.(Í¥ý¾ÿÿÿÿÿ8ùˆ†º†2J$797971ac-4ac3-4d5b-9136-aecccd50780f
+’	php:S11920"PDefine a constant instead of duplicating this literal "/Bearer\s(\S+)/" 5 times.(ìâÁ8ùˆ†º†2J$5cc4626c-0690-4afe-9e63-7ae9ddfaac3f
+›	php:S11921"TDefine a constant instead of duplicating this literal "Token not provided." 5 times.(û‰€Èøÿÿÿÿ8ùˆ†º†2J$fd8c23ac-c89f-4d38-a7af-d1250fce0635
+—	php:S1192<"UDefine a constant instead of duplicating this literal "Unauthorized access." 3 times.(±¿êÝ8ùˆ†º†2J$d65a62ed-ddd0-422e-848e-07ed4b7977b3
+’	php:S11929"PDefine a constant instead of duplicating this literal "User not found." 5 times.(ÞÁŠê8 Í­–…2J$1b01ca98-21e7-46c9-a2a3-30301361eadc

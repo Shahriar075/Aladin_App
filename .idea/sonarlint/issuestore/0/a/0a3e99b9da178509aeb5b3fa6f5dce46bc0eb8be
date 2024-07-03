@@ -1,0 +1,5 @@
+
+¢	php:S1448"`Class "User" has 30 methods, which is greater than 20 authorized. Split it into smaller classes.(îô±™8Á›ÊÏ„2J$9ea05ccd-bce7-4cf7-bfdb-f5439602765a
+¯	php:S1186Š"lAdd a nested comment explaining why this method is empty, throw an Exception or complete the implementation.(ÁËµß8è…ÁÑ„2J$0352e7b3-b158-4907-96d3-02bef0cb2495
+r	php:S1066£"/Merge this if statement with the enclosing one.(êç•‹8þÌÚÌ‚2J$fb71d7b7-71bc-4a9e-978f-aba31e785ac3
+w	php:S1066û"/Merge this if statement with the enclosing one.(¿˜Ãœÿÿÿÿÿ8”§×…ƒ2J$8da17e41-1071-4873-a7be-90c3c264119e
