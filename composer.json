@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",
+        "ext-http": "*",
         "ext-iconv": "*",
         "api-platform/core": "^3.3",
         "doctrine/dbal": "^3",
@@ -13,6 +14,8 @@
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.2",
         "firebase/php-jwt": "^6.10",
+        "knpuniversity/oauth2-client-bundle": "^2.18",
+        "league/oauth2-google": "^4.0",
         "lexik/jwt-authentication-bundle": "^3.0",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",
@@ -21,8 +24,7 @@
         "symfony/runtime": "7.1.*",
         "symfony/security-bundle": "7.1.*",
         "symfony/serializer": "7.1.*",
-        "symfony/yaml": "7.1.*",
-      "ext-http": "*"
+        "symfony/yaml": "7.1.*"
     },
     "config": {
         "allow-plugins": {
