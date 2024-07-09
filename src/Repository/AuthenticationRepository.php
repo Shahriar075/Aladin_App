@@ -25,6 +25,6 @@ class AuthenticationRepository extends ServiceEntityRepository
             ->andWhere('auth.signOut IS NULL')
             ->setParameter('user', $user)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
     }
 }

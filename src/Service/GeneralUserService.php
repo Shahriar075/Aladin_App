@@ -117,7 +117,6 @@ class GeneralUserService{
         if (!$activeAuthentication) {
             throw new \RuntimeException('User is not signed in. Please sign in before clocking in.');
         }
-
         $existingAttendance = $this->attendanceRepository->findAttendanceForToday($user);
 
         if ($existingAttendance) {
@@ -149,12 +148,13 @@ class GeneralUserService{
     public function ClockOut(User $user, \DateTime $clockOutTime): void
     {
         $attendance = $this->attendanceRepository->findActiveClockIn($user);
+        $existingAttendance = $this->attendanceRepository->findAttendanceForToday($user);
 
-        if (!$attendance) {
-            throw new \RuntimeException('User has already clocked out for today.');
+        if (!$existingAttendance) {
+            throw new \RuntimeException('User has not clocked in yet.');
         }
 
-        if ($attendance->getClockOut() !== null) {
+        if (!$attendance) {
             throw new \RuntimeException('User has already clocked out today.');
         }
 
@@ -169,12 +169,10 @@ class GeneralUserService{
             return false;
         }
 
-        // Get all roles associated with the user
         $roles = $user->getRoles();
 
-        // Check if any of the roles have the name 'Admin'
         foreach ($roles as $role) {
-            if ($role === 'Admin') { // Adjust 'ROLE_ADMIN' as per your role naming convention
+            if ($role === 'Admin') {
                 return true;
             }
         }
@@ -182,6 +180,22 @@ class GeneralUserService{
         return false;
     }
 
+    public function isTeamLead(User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $roles = $user->getRoles();
+
+        foreach ($roles as $role) {
+            if ($role === 'Team Lead') {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 }
 

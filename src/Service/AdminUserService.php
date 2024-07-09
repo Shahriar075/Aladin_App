@@ -64,7 +64,7 @@ class AdminUserService{
             throw $e;
         }
     }
-    public function assignTeamLeadByEmail(string $teamLeadEmail, string $adminEmail): void
+    public function assignTeamLeadByEmail(string $teamLeadEmail, string $adminEmail, string $teamName = 'GGWP'): void
     {
         $admin = $this->userRepository->findOneBy(['email' => $adminEmail]);
         if (!$admin) {
@@ -76,7 +76,6 @@ class AdminUserService{
             throw new \Exception("User with email '{$teamLeadEmail}' not found.");
         }
 
-        $teamName = 'GGWP';
         $team = $this->teamRepository->findOneBy(['teamName' => $teamName]);
         if (!$team) {
             $team = new Team();
@@ -97,7 +96,8 @@ class AdminUserService{
         $this->entityManager->flush();
     }
 
-    public function assignUserToTeamLead(string $userEmail, string $teamLeadEmail, string $adminEmail): void
+
+    public function assignUserToTeamLead(string $userEmail, string $teamLeadEmail, int $teamId, string $adminEmail): void
     {
         $admin = $this->userRepository->findOneBy(['email' => $adminEmail]);
         if (!$admin || !$this->generalUserService->isAdmin($admin)) {
@@ -109,14 +109,14 @@ class AdminUserService{
             throw new \Exception("Team lead with email '{$teamLeadEmail}' not found.");
         }
 
+        $team = $this->teamRepository->findOneBy(['id' => $teamId, 'teamLead' => $teamLead]);
+        if (!$team) {
+            throw new \Exception("Team with id '{$teamId}' led by '{$teamLeadEmail}' not found.");
+        }
+
         $user = $this->userRepository->findOneBy(['email' => $userEmail]);
         if (!$user) {
             throw new \Exception("User with email '{$userEmail}' not found.");
-        }
-
-        $team = $teamLead->getTeam();
-        if (!$team) {
-            throw new \Exception("Team lead with email '{$teamLeadEmail}' is not leading any team.");
         }
 
         try {
@@ -124,15 +124,12 @@ class AdminUserService{
             $user->setTeam($team);
 
             $this->entityManager->flush();
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             throw $e;
         }
     }
 }
 
-
-//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWwiOiJhZG1pbkBleGFieXRpbmcuY29tIiwiZXhwIjoxNzE5MjMyOTI5fQ.x8ub1qbdXNBF-GO85Y84rr-aKdjoTY242th4GecoqDY
 
 
 ?>

@@ -66,11 +66,11 @@ class ProfileService
 
             $duration = 'N/A';
             if ($clockOutTime) {
-                $interval = $clockInTime->diff($clockOutTime);
+                $interval = $clockInTime->diff($clockOutTime, true);
                 $duration = $interval->format('%H:%I:%S');
             }
-
             $attendanceHistory[] = [
+                'name' => $user->getName(),
                 'date' => $clockInTime->format('Y-m-d'),
                 'clock_in_time' => $clockInTime->format('H:i:s'),
                 'clock_out_time' => $clockOutTime ? $clockOutTime->format('H:i:s') : 'N/A',

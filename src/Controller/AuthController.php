@@ -22,7 +22,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class ApiController extends AbstractController
+class AuthController extends AbstractController
 {
     private GeneralUserService $generalUserService;
     private UserRepository $userRepository;
@@ -49,6 +49,18 @@ class ApiController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
+    private function getUserData(User $user): array
+    {
+        return [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'gender' => $user->getGender(),
+            'designation' => $user->getDesignation(),
+            'phone' => $user->getPhone(),
+        ];
+    }
+
     private function getUserFromJwt(string $jwtToken): ?User
     {
         $tokenParts = explode('.', $jwtToken);
@@ -73,7 +85,7 @@ class ApiController extends AbstractController
         $currentUser = $this->getUserFromJwt($jwtToken);
 
         if (!$this->generalUserService->isAdmin($currentUser)) {
-            throw new AccessDeniedException('Only administrators are allowed to register new users.');
+            return new JsonResponse(['message' => 'Only administrators are allowed to register new users.'], JsonResponse::HTTP_FORBIDDEN);
         }
 
         if (!$currentUser instanceof User) {
@@ -101,14 +113,13 @@ class ApiController extends AbstractController
             $jsonData = $serializer->serialize($user, 'json', ['groups' => ['user:read']]);
             $responseData = [
                 'message' => 'User registered successfully.',
-                'user' => json_decode($jsonData, true),
+                'user' => $this->getUserData($user),
             ];
             return new JsonResponse($responseData, JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
     }
-
 
     #[Route('/assign-team-lead', name: 'assign_team_lead', methods: ['POST'])]
     public function assignTeamLead(Request $request): JsonResponse
@@ -124,23 +135,47 @@ class ApiController extends AbstractController
         $currentUser = $this->getUserFromJwt($jwtToken);
 
         if (!$this->generalUserService->isAdmin($currentUser)) {
-            throw new AccessDeniedException('Only administrators are allowed to assign team leads.');
+            return new JsonResponse(['message' => 'Only administrators are allowed to assign team lead.'], JsonResponse::HTTP_FORBIDDEN);
+        }
+
+        $email = $currentUser->getEmail();
+        $data = json_decode($request->getContent(), true);
+        $teamLeadEmail = $data['teamLeadEmail'] ?? '';
+        $teamName = $data['teamName'] ?? '';
+
+        try {
+            $this->adminUserService->assignTeamLeadByEmail($teamLeadEmail, $email, $teamName);
+            return new JsonResponse(['message' => 'Team lead registered successfully.'], JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }
+
+
+    #[Route('/assign-user-to-team-lead', name: 'assign_user_to_team_lead', methods: ['POST'])]
+    public function assignUserToTeamLead(Request $request): JsonResponse
+    {
+        $authHeader = $request->headers->get('Authorization');
+
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            return new JsonResponse(['error' => 'Token not provided.'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $jwtToken = $matches[1];
+        $currentUser = $this->getUserFromJwt($jwtToken);
+
+        if (!$this->generalUserService->isAdmin($currentUser)) {
+            return new JsonResponse(['message' => 'Only administrators are allowed to assign team lead to new users.'], JsonResponse::HTTP_FORBIDDEN);
         }
 
         $email = $currentUser->getEmail();
         $data = json_decode($request->getContent(), true);
         $userEmail = $data['email'] ?? '';
-        $userId = $data['userId'] ?? null;
         $teamLeadEmail = $data['teamLeadEmail'] ?? '';
-
-        $user = $this->userRepository->find($userId);
-
-        if (!$user) {
-            return new JsonResponse(['error' => 'Invalid user or team lead ID.'], JsonResponse::HTTP_BAD_REQUEST);
-        }
+        $teamId = $data['teamId'] ?? '';
 
         try {
-            $this->adminUserService->assignUserToTeamLead($userEmail,$teamLeadEmail,$email);
+            $this->adminUserService->assignUserToTeamLead($userEmail, $teamLeadEmail, $teamId, $email);
             return new JsonResponse(['message' => 'Team lead assigned successfully.'], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
@@ -166,7 +201,9 @@ class ApiController extends AbstractController
         try {
             $this->leaveService->applyLeave($user, $startDate, $endDate, $leaveReason);
 
-            return new JsonResponse(['message' => 'Leave request submitted successfully.'], JsonResponse::HTTP_OK);
+            return new JsonResponse([
+                'username' => $user->getName(),
+                'message' => 'Leave request submitted successfully.'], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
@@ -197,7 +234,7 @@ class ApiController extends AbstractController
         }
 
         if ($leaveRequest->getTeamLead() !== $currentUser) {
-            throw new AccessDeniedException('Only the assigned team lead can approve this leave request.');
+            return new JsonResponse(['message' => 'Only the assigned team lead can approve the request.'], JsonResponse::HTTP_FORBIDDEN);
         }
 
         try {
@@ -260,12 +297,14 @@ class ApiController extends AbstractController
         $currentUser = $this->getUserFromJwt($jwtToken);
 
         $data = json_decode($request->getContent(), true);
-        $createdAt = new \DateTime($data['createdAt']);
+        $createdAt = new \DateTime();
 
         try {
             $this->generalUserService->ClockIn($currentUser, $createdAt);
 
-            return new JsonResponse(['message' => 'Clock-in successful.'], JsonResponse::HTTP_OK);
+            return new JsonResponse([
+                'username' => $currentUser->getName(),
+                'message' => 'Clock-in successful.'], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
@@ -283,12 +322,14 @@ class ApiController extends AbstractController
 
         $currentUser = $this->getUserFromJwt($jwtToken);
         $data = json_decode($request->getContent(), true);
-        $clockOutTime = new \DateTime($data['clockOutTime']);
+        $clockOutTime = new \DateTime();
 
         try {
             $this->generalUserService->ClockOut($currentUser, $clockOutTime);
 
-            return new JsonResponse(['message' => 'Clock-out successful.'], JsonResponse::HTTP_OK);
+            return new JsonResponse([
+                'username' => $currentUser->getName(),
+                'message' => 'Clock-out successful.'], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }

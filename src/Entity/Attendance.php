@@ -14,7 +14,7 @@ class Attendance extends BaseEntity
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTime $clockIn = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]

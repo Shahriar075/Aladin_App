@@ -15,4 +15,16 @@ class LeaveRequestRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, LeaveRequest::class);
     }
+
+    public function findLeaveRequestsForTeamLead($teamLeadId)
+    {
+        return $this->createQueryBuilder('lr')
+            ->join('lr.user', 'u')
+            ->andWhere('lr.teamLead = :teamLeadId')
+            ->andWhere('u != :teamLeadUser')
+            ->setParameter('teamLeadId', $teamLeadId)
+            ->setParameter('teamLeadUser', $teamLeadId)
+            ->getQuery()
+            ->getResult();
+    }
 }
